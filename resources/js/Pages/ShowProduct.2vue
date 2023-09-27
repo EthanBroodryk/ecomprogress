@@ -1,0 +1,168 @@
+<!-- <script setup>
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { Head } from '@inertiajs/vue3';
+const {product} = defineProps(['product']);
+let totalPrice = 0;
+const addToTotal = () =>{
+
+    totalPrice += product.price
+    console.log('TOTPRICE',totalPrice)
+}
+</script> -->
+
+
+<script>
+
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { Head } from '@inertiajs/vue3';
+import {ref} from 'vue'
+export default {
+
+    props:{
+        product:[],
+    },
+    
+    data(){
+        return {
+            cartTotal: 0,
+            cart:[],
+            productArray:[],
+            itemCount: 0,
+       
+        }
+    },
+
+    setup(){
+        const count = ref(0)
+        return {
+            count
+        }
+    },
+    mounted(){
+        this.product.quantity = 1
+        this.getItemFromLocalStorage();
+        const storedProducts = localStorage.getItem('productArray');
+        if(storedProducts){
+            this.productArray = JSON.parse(storedProducts)
+        }
+            for (let i = 0; i <  this.productArray.length ; i++) {
+                if(this.productArray[i].id == this.product.id){
+                   this.itemCount += 1
+                }
+            }
+            if(this.itemCount > 0){
+
+            }else{
+                this.productArray.push(this.product)
+            }
+            localStorage.setItem('productArray',JSON.stringify(this.productArray))
+    },
+
+    methods:{
+        addProduct(){
+            this.cartTotal+=parseInt(this.product.price)
+            this.saveItemToLocalStorage(this.cartTotal)
+        },
+        deductProduct(){
+            if(this.cartTotal < 1){
+                this.cartTotal = 0
+            }else{
+                this.cartTotal-=this.product.price
+                this.saveItemToLocalStorage(this.cartTotal)
+            }
+        },
+
+        saveItemToLocalStorage(x){
+          localStorage.setItem('cartTotal',x)
+        },
+
+        getItemFromLocalStorage(){
+          const storedTotal = localStorage.getItem('cartTotal');
+          if(storedTotal){
+            this.cartTotal = parseInt(storedTotal)
+          }
+        },
+        addIndividualItemPrice(x){
+   
+  
+           console.log('The item quantiity',  this.product.quantity)
+           this.cartTotal+=x
+           if(this.product.quantity > 0){
+             this.product.quantity += 1
+             console.log('quantiity added',  this.product.quantity)
+           }
+        },
+        removeIndividualItemPrice(x){
+
+            if(this.product.quantity > 0){
+             this.product.quantity -= 1
+             console.log('quantiity added',  this.product.quantity)
+            if(this.cartTotal > 0){
+                this.cartTotal -=x
+            }
+           }
+        }
+    }
+
+}
+
+</script>
+
+
+
+
+<template>
+    <Head title="Dashboard" />
+
+    <AuthenticatedLayout>
+        <template #header>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Product</h2>
+        </template>
+
+        <div class="py-12">
+
+            <!-- -->
+           <div class="row">
+                <div class="col">
+                    <div v-for="(item, index) in productArray" :key="index" class="card" style="width: 18rem;">
+                        <br>
+                        <br>
+                        <img  v-bind:src="item.filename" class="card-img-top">
+                        <div class="card-body">
+                            <button 
+                            @click="addIndividualItemPrice(item.price)"
+                            class="inline-flex items-center px-4 py-2 bg-green-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            Add</button>
+                        </div>
+                    </div>
+                </div>
+           </div>
+            <!-- -->
+
+            <!-- <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-gray-900">View Product</div>
+    
+                    <br>
+                    <ul>
+                        <li  v-for="(item, index) in productArray" :key="index"><img style="height: 100px;" v-bind:src="item.filename">
+                                <button @click="item.price += item.price">add   {{ item.price }}</button>
+                                <button @click="addIndividualItemPrice(item.price)">function   {{ item.price }}</button>
+                            <br>
+                                <button @click="removeIndividualItemPrice(item.price)">remove</button>
+                        </li>
+                    </ul>
+                    <br>
+                        <div> <span>Total Price = {{this.cartTotal}}</span></div>
+                    <br>
+                    <br>
+                        <button @click="count++">{{count}}</button>
+                    <br>
+                        <button @click="addProduct()">CLICKTOADD</button>
+                    <br>
+                        <button @click="deductProduct()">DEDUCT</button>
+                </div>
+            </div> -->
+        </div>
+    </AuthenticatedLayout>
+</template>
